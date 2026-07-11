@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>组织关系互动图 · 炫酷版</title>
-<script src="vis-network.min.js"></script>
-<link  rel="stylesheet">
-<script src="xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.6/standalone/umd/vis-network.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.6/dist/vis-network.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#0f0f1a;color:#e0e0e0}
@@ -88,10 +88,7 @@ function handleFile(f){
   var r=new FileReader();
   r.onload=function(e){
     try{var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});buildGraph(wb)}
-    catch(err){alert('读取Excel失败
-'+err.message+'
-
-请用WPS/Excel另存为.xlsx后重试')}
+    catch(err){alert('读取Excel失败\n'+err.message+'\n\n请用WPS/Excel另存为.xlsx后重试')}
   };
   r.readAsArrayBuffer(f);
 }
