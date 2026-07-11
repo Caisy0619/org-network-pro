@@ -88,7 +88,10 @@ function handleFile(f){
   var r=new FileReader();
   r.onload=function(e){
     try{var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});buildGraph(wb)}
-    catch(err){alert('读取Excel失败\n'+err.message+'\n\n请用WPS/Excel另存为.xlsx后重试')}
+    catch(err){alert('读取Excel失败
+'+err.message+'
+
+请用WPS/Excel另存为.xlsx后重试')}
   };
   r.readAsArrayBuffer(f);
 }
