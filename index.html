@@ -200,6 +200,7 @@ function renderNetwork(){
     edges:{smooth:{type:'curvedCW',roundness:0.1}},
   });
   setTimeout(function(){network.setOptions({physics:{enabled:false}})},3000);
+  applyEdgeToggles();
   document.getElementById('search').oninput=function(e){var q=e.target.value.trim();if(!q){network.selectNodes([]);network.unselectAll();return}var m=nodes.get().filter(function(n){return n.label.indexOf(q)>=0});if(m.length){network.selectNodes([m[0].id]);network.focus(m[0].id,{scale:1.5,animation:{duration:300}});}};
   // Toggle edges
   document.getElementById('togReport').onchange=function(e){
@@ -219,6 +220,16 @@ function renderNetwork(){
   });
 }
 function closeDetail(){document.getElementById('detailPanel').classList.remove('open')}
+function applyEdgeToggles(){
+  if(!network)return;
+  var e=network.body.data.edges;
+  var hr=document.getElementById('togReport').checked;
+  var hc=document.getElementById('togCollab').checked;
+  e.forEach(function(ed){
+    if(ed.title==='汇报')e.update({id:ed.id,hidden:!hr});
+    if(ed.title==='协作')e.update({id:ed.id,hidden:!hc});
+  });
+}
 </script>
 </body>
 </html>
