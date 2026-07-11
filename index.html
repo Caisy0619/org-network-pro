@@ -56,6 +56,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div id="chartArea">
   <div class="toolbar">
     <input id="search" type="text" placeholder="搜索姓名...">
+    <label style="font-size:12px;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" id="togReport" checked> 📊汇报</label>
+    <label style="font-size:12px;color:#aaa;cursor:pointer;display:flex;align-items:center;gap:4px"><input type="checkbox" id="togCollab" checked> 🔗协作</label>
     <div class="filter-group" id="deptFilters"></div>
     <span id="status"></span>
   </div>
@@ -199,6 +201,13 @@ function renderNetwork(){
   });
   setTimeout(function(){network.setOptions({physics:{enabled:false}})},3000);
   document.getElementById('search').oninput=function(e){var q=e.target.value.trim();if(!q){network.selectNodes([]);network.unselectAll();return}var m=nodes.get().filter(function(n){return n.label.indexOf(q)>=0});if(m.length){network.selectNodes([m[0].id]);network.focus(m[0].id,{scale:1.5,animation:{duration:300}});}};
+  // Toggle edges
+  document.getElementById('togReport').onchange=function(e){
+    edges.forEach(function(ed){if(ed.title==='汇报')edges.update({id:ed.id,hidden:!e.target.checked})});
+  };
+  document.getElementById('togCollab').onchange=function(e){
+    edges.forEach(function(ed){if(ed.title==='协作')edges.update({id:ed.id,hidden:!e.target.checked})});
+  };
   network.on('click',function(params){
     if(params.nodes.length){var p=people.find(function(x){return x.id===params.nodes[0]});if(p){
       document.getElementById('dName').textContent=p.id;document.getElementById('dDept').textContent=p.dept;
