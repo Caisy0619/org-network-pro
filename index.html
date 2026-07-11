@@ -200,6 +200,9 @@ function renderNetwork(){
     edges:{smooth:{type:'curvedCW',roundness:0.1}},
   });
   setTimeout(function(){network.setOptions({physics:{enabled:false}})},3000);
+  // Save originals for restore
+  _nodeOrigins={};nodes.forEach(function(n){_nodeOrigins[n.id]={color:JSON.parse(JSON.stringify(n.color)),font:JSON.parse(JSON.stringify(n.font))}});
+  _edgeOrigins={};edges.forEach(function(ed){_edgeOrigins[ed.id]={color:JSON.parse(JSON.stringify(ed.color)),width:ed.width}});
   applyEdgeToggles();
   document.getElementById('search').oninput=function(e){var q=e.target.value.trim();if(!q){network.selectNodes([]);network.unselectAll();return}var m=nodes.get().filter(function(n){return n.label.indexOf(q)>=0});if(m.length){network.selectNodes([m[0].id]);network.focus(m[0].id,{scale:1.5,animation:{duration:300}});}};
   // Toggle edges
@@ -210,16 +213,57 @@ function renderNetwork(){
     edges.forEach(function(ed){if(ed.title==='协作')edges.update({id:ed.id,hidden:!e.target.checked})});
   };
   network.on('click',function(params){
-    if(params.nodes.length){var p=people.find(function(x){return x.id===params.nodes[0]});if(p){
-      document.getElementById('dName').textContent=p.id;document.getElementById('dDept').textContent=p.dept;
-      document.getElementById('dTitle').textContent=p.title;document.getElementById('dReportsTo').textContent=p.reportsTo||'无';
-      document.getElementById('dCollab').textContent=p.collab||'无';document.getElementById('dGroup').textContent=p.group;
-      document.getElementById('dRegion').textContent=p.region||'无';
-      document.getElementById('detailPanel').classList.add('open');
-    }}else closeDetail();
+    if(params.nodes.length){
+      var sel=params.nodes[0];
+      // Get direct neighbors
+      var connEdges=edges.get({filter:function(ed){return ed.from===sel||ed.to===sel}});
+      var neighborIds={};neighborIds[sel]=true;
+      connEdges.forEach(function(ed){neighborIds[ed.from]=true;neighborIds[ed.to]=true});
+      // Dim non-connected nodes
+      nodes.forEach(function(n){
+        if(neighborIds[n.id]){
+          nodes.update({id:n.id,color:{background:n.color.background,border:n.color.background,highlight:{background:n.color.background,border:'#fff'}},font:{color:'#fff',size:n.font.size,face:'PingFang SC, Microsoft YaHei, sans-serif',strokeWidth:2,strokeColor:'rgba(0,0,0,0.6)'}});
+        }else{
+          nodes.update({id:n.id,color:{background:'rgba(255,255,255,0.06)',border:'transparent'},font:{color:'rgba(255,255,255,0.15)',size:n.font.size-1,face:'PingFang SC, Microsoft YaHei, sans-serif',strokeWidth:0}});
+        }
+      });
+      // Dim non-connected edges
+      var connEdgeIds={};connEdges.forEach(function(ed){connEdgeIds[ed.id]=true});
+      edges.forEach(function(ed){
+        if(connEdgeIds[ed.id]){
+          edges.update({id:ed.id,color:{color:ed.title==='汇报'?'rgba(255,255,255,0.6)':'rgba(0,210,255,0.7)'},width:ed.title==='汇报'?2.5:1.5});
+        }else{
+          edges.update({id:ed.id,color:{color:'rgba(255,255,255,0.03)'},width:0.3});
+        }
+      });
+      // Show detail
+      var p=people.find(function(x){return x.id===sel});
+      if(p){
+        document.getElementById('dName').textContent=p.id;document.getElementById('dDept').textContent=p.dept;
+        document.getElementById('dTitle').textContent=p.title;document.getElementById('dReportsTo').textContent=p.reportsTo||'无';
+        document.getElementById('dCollab').textContent=p.collab||'无';document.getElementById('dGroup').textContent=p.group;
+        document.getElementById('dRegion').textContent=p.region||'无';
+        document.getElementById('detailPanel').classList.add('open');
+      }
+    }else{
+      closeDetail();
+      // Restore all nodes and edges
+      restoreGraph();
+    }
   });
 }
 function closeDetail(){document.getElementById('detailPanel').classList.remove('open')}
+var _nodeOrigins={},_edgeOrigins={};
+function restoreGraph(){
+  if(!network)return;
+  Object.keys(_nodeOrigins).forEach(function(id){
+    nodes.update({id:id,color:_nodeOrigins[id].color,font:_nodeOrigins[id].font});
+  });
+  Object.keys(_edgeOrigins).forEach(function(id){
+    edges.update({id:id,color:_edgeOrigins[id].color,width:_edgeOrigins[id].width});
+  });
+  applyEdgeToggles();
+}
 function applyEdgeToggles(){
   if(!network)return;
   var e=network.body.data.edges;
